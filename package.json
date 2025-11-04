@@ -17,7 +17,7 @@
     "build:server": "vite build --config vite.config.server.ts",
     "start": "node dist/server/node-build.mjs",
     "vercel-build": "npm run build",
-    "postbuild": "if not exist api mkdir api && copy dist\\server\\node-build.mjs api\\index.js",
+    "postbuild": "node -e \"const fs = require('fs'); fs.mkdirSync('api', {recursive: true}); fs.copyFileSync('dist/server/node-build.mjs', 'api/index.js');\"",
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
