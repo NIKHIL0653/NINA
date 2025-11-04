@@ -36,6 +36,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import BottomNav from "@/components/BottomNav";
 import RecordAnalytics from "@/components/RecordAnalytics";
 import {
@@ -61,6 +67,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -250,6 +257,14 @@ export default function RecordsNew() {
           ["cbc", "lft", "kft", "lipid", "tft", "blood-sugar", "vitamin-d", "hba1c", "electrolytes", "urine"].includes(record.testId)
         ),
       },
+      {
+        id: "timeline",
+        title: "Health Timeline",
+        icon: Clock,
+        color: "text-green-600",
+        description: "Chronological view of your health events and records",
+        records: savedRecords, // All records for timeline view
+      },
     ];
 
     return sections;
@@ -344,7 +359,7 @@ export default function RecordsNew() {
       testName: currentTest.name,
       testId: activeTest,
       date: testDate,
-      parameters: currentTest.parameters.filter((p) => p.value && p.value.trim() !== ""),
+      parameters: currentTest.parameters.filter((p) => p.value && p.value.trim() !== "").map(p => ({ ...p, value: p.value! })),
     };
 
     // Save to database
@@ -527,173 +542,244 @@ export default function RecordsNew() {
               </>
             )}
 
-            {/* Records Sections */}
-            <div className="space-y-4">
-              {recordSections.map((section) => {
-                const Icon = section.icon;
-                const isOpen = openSections[section.id] ?? section.records.length > 0;
-                const setIsOpen = (open: boolean) => {
-                  setOpenSections(prev => ({ ...prev, [section.id]: open }));
-                };
-                
-                return (
-                  <Card key={section.id} className="shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200">
-                    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-                      <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors duration-200 rounded-t-lg">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className={cn("p-3 rounded-xl bg-gradient-to-br",
-                                section.color === "text-blue-600" && "from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20",
-                                section.color === "text-green-600" && "from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20",
-                                section.color === "text-purple-600" && "from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20",
-                                section.color === "text-indigo-600" && "from-indigo-100 to-indigo-50 dark:from-indigo-900/30 dark:to-indigo-800/20"
-                              )}>
-                                <Icon className={cn("w-5 h-5", section.color)} />
+            {/* Records Sections with Tabs */}
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-4 mt-6">
+                {recordSections.filter(section => section.id !== 'timeline').map((section) => {
+                  const Icon = section.icon;
+                  const isOpen = openSections[section.id] ?? section.records.length > 0;
+                  const setIsOpen = (open: boolean) => {
+                    setOpenSections(prev => ({ ...prev, [section.id]: open }));
+                  };
+
+                  return (
+                    <Card key={section.id} className="shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200">
+                      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+                        <CollapsibleTrigger asChild>
+                          <CardHeader className="cursor-pointer hover:bg-muted/30 transition-colors duration-200 rounded-t-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className={cn("p-3 rounded-xl bg-gradient-to-br",
+                                  section.color === "text-blue-600" && "from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20",
+                                  section.color === "text-green-600" && "from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20",
+                                  section.color === "text-purple-600" && "from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20",
+                                  section.color === "text-indigo-600" && "from-indigo-100 to-indigo-50 dark:from-indigo-900/30 dark:to-indigo-800/20"
+                                )}>
+                                  <Icon className={cn("w-5 h-5", section.color)} />
+                                </div>
+                                <div>
+                                  <CardTitle className="text-lg font-semibold">{section.title}</CardTitle>
+                                  <p className="text-sm text-muted-foreground">{section.description}</p>
+                                </div>
                               </div>
-                              <div>
-                                <CardTitle className="text-lg font-semibold">{section.title}</CardTitle>
-                                <p className="text-sm text-muted-foreground">{section.description}</p>
+                              <div className="flex items-center space-x-3">
+                                <Badge variant="secondary" className={cn("px-3 py-1 font-medium",
+                                  section.records.length > 0 ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" : "bg-gray-100 text-gray-600"
+                                )}>
+                                  {section.records.length}
+                                </Badge>
+                                {isOpen ? (
+                                  <ChevronUp className="w-5 h-5 text-muted-foreground transition-transform duration-200" />
+                                ) : (
+                                  <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200" />
+                                )}
                               </div>
                             </div>
-                            <div className="flex items-center space-x-3">
-                              <Badge variant="secondary" className={cn("px-3 py-1 font-medium",
-                                section.records.length > 0 ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" : "bg-gray-100 text-gray-600"
-                              )}>
-                                {section.records.length}
-                              </Badge>
-                              {isOpen ? (
-                                <ChevronUp className="w-5 h-5 text-muted-foreground transition-transform duration-200" />
-                              ) : (
-                                <ChevronDown className="w-5 h-5 text-muted-foreground transition-transform duration-200" />
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="pt-0">
-                          {section.records.length > 0 ? (
-                            <div className="space-y-3">
-                              {section.records.map((record) => (
-                                <div
-                                  key={record.id}
-                                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200"
-                                >
-                                  <div className="flex-1">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-3">
-                                      <h4 className="font-semibold text-foreground text-sm">{record.testName}</h4>
-                                      <div className="flex items-center space-x-2 mt-1 sm:mt-0">
-                                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                          <Calendar className="w-3 h-3 mr-1" />
-                                          {new Date(record.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                          })}
-                                        </Badge>
-                                        <Badge variant="secondary" className="text-xs">
-                                          {record.parameters.length}
-                                        </Badge>
+                          </CardHeader>
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent>
+                          <CardContent className="pt-0">
+                            {section.records.length > 0 ? (
+                              <div className="space-y-3">
+                                {section.records.map((record) => (
+                                  <div
+                                    key={record.id}
+                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200"
+                                  >
+                                    <div className="flex-1">
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-3">
+                                        <h4 className="font-semibold text-foreground text-sm">{record.testName}</h4>
+                                        <div className="flex items-center space-x-2 mt-1 sm:mt-0">
+                                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                            <Calendar className="w-3 h-3 mr-1" />
+                                            {new Date(record.date).toLocaleDateString('en-US', {
+                                              month: 'short',
+                                              day: 'numeric'
+                                            })}
+                                          </Badge>
+                                          <Badge variant="secondary" className="text-xs">
+                                            {record.parameters.length}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                                        {record.parameters.slice(0, 3).map((param, idx) => (
+                                          <div key={idx} className="flex items-center justify-between text-xs bg-gray-50 dark:bg-gray-700 rounded p-1.5">
+                                            <span className="text-muted-foreground font-medium truncate">{param.name}</span>
+                                            <div className="flex items-center space-x-1 ml-2">
+                                              <span className="font-semibold text-xs">{param.value}</span>
+                                              {param.status && (
+                                                <div className={cn("w-2 h-2 rounded-full",
+                                                  param.status === 'normal' ? 'bg-green-500' :
+                                                  param.status === 'high' ? 'bg-red-500' : 'bg-yellow-500'
+                                                )}></div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                        {record.parameters.length > 3 && (
+                                          <div className="flex items-center justify-center text-xs text-muted-foreground bg-muted/50 rounded p-1.5">
+                                            +{record.parameters.length - 3}
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
-                                      {record.parameters.slice(0, 3).map((param, idx) => (
-                                        <div key={idx} className="flex items-center justify-between text-xs bg-gray-50 dark:bg-gray-700 rounded p-1.5">
-                                          <span className="text-muted-foreground font-medium truncate">{param.name}</span>
-                                          <div className="flex items-center space-x-1 ml-2">
-                                            <span className="font-semibold text-xs">{param.value}</span>
-                                            {param.status && (
-                                              <div className={cn("w-2 h-2 rounded-full", 
-                                                param.status === 'normal' ? 'bg-green-500' : 
-                                                param.status === 'high' ? 'bg-red-500' : 'bg-yellow-500'
-                                              )}></div>
-                                            )}
+                                    <div className="flex flex-col space-y-2 mt-3 sm:mt-0">
+                                      <Dialog>
+                                        <DialogTrigger asChild>
+                                          <Button variant="outline" size="sm" className="h-8 px-2">
+                                            <Eye className="w-3 h-3 mr-1" />
+                                            <span className="text-xs">View</span>
+                                          </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+                                          <DialogHeader>
+                                            <DialogTitle className="text-xl font-bold text-blue-600">
+                                              {record.testName}
+                                            </DialogTitle>
+                                            <div className="flex items-center space-x-2 text-muted-foreground">
+                                              <Calendar className="w-4 h-4" />
+                                              <span>{record.date}</span>
+                                            </div>
+                                          </DialogHeader>
+                                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
+                                            {record.parameters.map((param, idx) => (
+                                              <Card key={idx} className="border-0 shadow-md">
+                                                <CardContent className="p-4">
+                                                  <div className="flex justify-between items-start mb-3">
+                                                    <h5 className="font-semibold text-sm">{param.name}</h5>
+                                                    {param.status && (
+                                                      <Badge className={cn("text-xs px-2 py-1", getStatusColor(param.status))}>
+                                                        {getStatusIcon(param.status)}
+                                                        <span className="ml-1 capitalize">{param.status}</span>
+                                                      </Badge>
+                                                    )}
+                                                  </div>
+                                                  <div className="space-y-2">
+                                                    <p className="text-2xl font-bold">
+                                                      {param.value}
+                                                      <span className="text-sm font-normal text-muted-foreground ml-1">
+                                                        {param.unit}
+                                                      </span>
+                                                    </p>
+                                                    <div className="bg-muted/30 rounded-md p-2">
+                                                      <p className="text-xs text-muted-foreground">
+                                                        Normal: {param.normalRange}
+                                                      </p>
+                                                    </div>
+                                                  </div>
+                                                </CardContent>
+                                              </Card>
+                                            ))}
                                           </div>
-                                        </div>
-                                      ))}
-                                      {record.parameters.length > 3 && (
-                                        <div className="flex items-center justify-center text-xs text-muted-foreground bg-muted/50 rounded p-1.5">
-                                          +{record.parameters.length - 3}
-                                        </div>
-                                      )}
+                                        </DialogContent>
+                                      </Dialog>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => deleteRecord(record.id)}
+                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </Button>
                                     </div>
                                   </div>
-                                  <div className="flex flex-col space-y-2 mt-3 sm:mt-0">
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="h-8 px-2">
-                                          <Eye className="w-3 h-3 mr-1" />
-                                          <span className="text-xs">View</span>
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
-                                        <DialogHeader>
-                                          <DialogTitle className="text-xl font-bold text-blue-600">
-                                            {record.testName}
-                                          </DialogTitle>
-                                          <div className="flex items-center space-x-2 text-muted-foreground">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>{record.date}</span>
-                                          </div>
-                                        </DialogHeader>
-                                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 pt-6">
-                                          {record.parameters.map((param, idx) => (
-                                            <Card key={idx} className="border-0 shadow-md">
-                                              <CardContent className="p-4">
-                                                <div className="flex justify-between items-start mb-3">
-                                                  <h5 className="font-semibold text-sm">{param.name}</h5>
-                                                  {param.status && (
-                                                    <Badge className={cn("text-xs px-2 py-1", getStatusColor(param.status))}>
-                                                      {getStatusIcon(param.status)}
-                                                      <span className="ml-1 capitalize">{param.status}</span>
-                                                    </Badge>
-                                                  )}
-                                                </div>
-                                                <div className="space-y-2">
-                                                  <p className="text-2xl font-bold">
-                                                    {param.value}
-                                                    <span className="text-sm font-normal text-muted-foreground ml-1">
-                                                      {param.unit}
-                                                    </span>
-                                                  </p>
-                                                  <div className="bg-muted/30 rounded-md p-2">
-                                                    <p className="text-xs text-muted-foreground">
-                                                      Normal: {param.normalRange}
-                                                    </p>
-                                                  </div>
-                                                </div>
-                                              </CardContent>
-                                            </Card>
-                                          ))}
-                                        </div>
-                                      </DialogContent>
-                                    </Dialog>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => deleteRecord(record.id)}
-                                      className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-8 text-muted-foreground">
+                                <Icon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                <p>No {section.title.toLowerCase()} recorded yet</p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </Card>
+                  );
+                })}
+              </TabsContent>
+
+              <TabsContent value="timeline" className="space-y-4 mt-6">
+                <Card className="shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Clock className="w-5 h-5 text-green-600" />
+                      <span>Health Timeline</span>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">Chronological view of your health events and records</p>
+                  </CardHeader>
+                  <CardContent>
+                    {savedRecords.length > 0 ? (
+                      <div className="space-y-4">
+                        {savedRecords
+                          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                          .map((record, index) => (
+                            <div key={record.id} className="flex items-start space-x-4">
+                              <div className="flex flex-col items-center">
+                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                {index < savedRecords.length - 1 && (
+                                  <div className="w-0.5 h-16 bg-gray-300 dark:bg-gray-600 mt-2"></div>
+                                )}
+                              </div>
+                              <div className="flex-1 pb-8">
+                                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <h4 className="font-semibold text-sm">{record.testName}</h4>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Calendar className="w-3 h-3 mr-1" />
+                                      {new Date(record.date).toLocaleDateString()}
+                                    </Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                    {record.parameters.slice(0, 6).map((param, idx) => (
+                                      <div key={idx} className="text-xs">
+                                        <span className="text-muted-foreground">{param.name}:</span>
+                                        <span className="font-medium ml-1">{param.value} {param.unit}</span>
+                                        {param.status && (
+                                          <span className={cn("ml-1 px-1 py-0.5 rounded text-xs",
+                                            param.status === 'normal' ? 'bg-green-100 text-green-800' :
+                                            param.status === 'high' ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800'
+                                          )}>
+                                            {param.status}
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
-                              ))}
+                              </div>
                             </div>
-                          ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                              <Icon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                              <p>No {section.title.toLowerCase()} recorded yet</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-                );
-              })}
-            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Clock className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No health events recorded yet</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+            </Tabs>
 
             {/* Empty State */}
             {totalRecords === 0 && (

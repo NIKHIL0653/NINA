@@ -21,6 +21,7 @@ import {
   BarChart3,
   Moon,
   Sun,
+  Phone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BottomNav from "./BottomNav";
@@ -38,8 +39,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Chat-specific header (blue bar with Nina centered)
   const renderChatHeader = () => (
     <nav className="sticky top-0 z-50 bg-blue-400 shadow-sm">
-      <div className="h-16 flex items-center justify-center">
-        <h1 className="text-xl font-semibold text-white">NINA</h1>
+      <div className="h-12 sm:h-16 flex items-center justify-center">
+        <h1 className="text-lg sm:text-xl font-semibold text-white">NINA</h1>
       </div>
     </nav>
   );
@@ -47,9 +48,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Records-specific header (title + account)
   const renderRecordsHeader = () => (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          <h1 className="text-xl font-semibold text-foreground">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-12 sm:h-16">
+          <h1 className="text-lg sm:text-xl font-semibold text-foreground">
             Clinical Records
           </h1>
 
@@ -120,11 +121,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Default header for other routes (logo + account)
   const renderDefaultHeader = () => (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-12 sm:h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2Fc8ab0ccd1c1f4c0983053a74f900b6ee%2F80852419a0194244b22ef22578b3e48b?format=webp&width=800"
                 alt="NINA AI Logo"
@@ -132,7 +133,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">NINA</h1>
+              <h1 className="text-lg sm:text-xl font-semibold text-foreground">NINA</h1>
             </div>
           </div>
 
@@ -142,7 +143,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <Button
                 variant={location.pathname === "/chat" ? "default" : "ghost"}
                 size="sm"
-                className={cn("relative group transition-all duration-300", location.pathname === "/chat" && "bg-blue-400 hover:bg-blue-500 text-white")}
+                className={cn("relative group transition-all duration-300 text-sm", location.pathname === "/chat" && "bg-blue-400 hover:bg-blue-500 text-white")}
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Chat
@@ -152,7 +153,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <Button
                 variant={location.pathname === "/records" ? "default" : "ghost"}
                 size="sm"
-                className={cn("relative group transition-all duration-300", location.pathname === "/records" && "bg-blue-400 hover:bg-blue-500 text-white")}
+                className={cn("relative group transition-all duration-300 text-sm", location.pathname === "/records" && "bg-blue-400 hover:bg-blue-500 text-white")}
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Records
@@ -164,7 +165,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   location.pathname === "/dashboard" ? "default" : "ghost"
                 }
                 size="sm"
-                className={cn("relative group transition-all duration-300", location.pathname === "/dashboard" && "bg-blue-400 hover:bg-blue-500 text-white")}
+                className={cn("relative group transition-all duration-300 text-sm", location.pathname === "/dashboard" && "bg-blue-400 hover:bg-blue-500 text-white")}
               >
                 <BarChart3 className="w-4 h-4 mr-2" />
                 News
@@ -239,18 +240,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
   // Settings-specific header (clean header without navigation)
   const renderSettingsHeader = () => (
     <nav className="sticky top-0 z-50 bg-blue-400 shadow-sm">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-12 sm:h-16">
           {/* Logo and Title */}
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-xl overflow-hidden shadow-lg">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2Fc8ab0ccd1c1f4c0983053a74f900b6ee%2F80852419a0194244b22ef22578b3e48b?format=webp&width=800"
                 alt="NINA AI Logo"
                 className="w-full h-full object-cover"
               />
             </div>
-            <h1 className="text-xl font-semibold text-white">Settings</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-white">Settings</h1>
           </div>
 
           {/* Profile Dropdown */}
@@ -301,6 +302,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       </div>
     </nav>
   );
+
 
   // Render appropriate header based on current route
   const renderHeader = () => {

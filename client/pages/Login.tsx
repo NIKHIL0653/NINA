@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Loader2, Mail } from "lucide-react";
+import { Heart, Loader2, Mail, Chrome } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@shared/supabase";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const { signIn } = useAuth();
   const navigate = useNavigate();
@@ -32,12 +34,34 @@ export default function Login() {
     setLoading(false);
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    setError("");
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/chat`
+        }
+      });
+
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err) {
+      setError("Failed to sign in with Google");
+    }
+
+    setGoogleLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-full max-w-sm space-y-2">
         {/* Logo */}
         <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
+          <div className="flex items-center justify-center space-x-3 mb-3">
             <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-lg">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2Fc8ab0ccd1c1f4c0983053a74f900b6ee%2F80852419a0194244b22ef22578b3e48b?format=webp&width=800"
@@ -55,18 +79,48 @@ export default function Login() {
 
         {/* Login Form */}
         <Card className="shadow-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-0 overflow-hidden">
-          <CardHeader className="bg-muted/30 pb-4">
+          <CardHeader className="bg-muted/30 pb-3">
             <CardTitle className="text-center text-xl font-bold text-foreground">Sign In</CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="p-4">
+{/* Google Sign In Button */}
+            <Button
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading}
+              className="w-full h-10 bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl rounded-lg"
+            >
+              {googleLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Signing in with Google...
+                </>
+              ) : (
+                <>
+                  <Chrome className="w-4 h-4 mr-2" />
+                  Continue with Google
+                </>
+              )}
+            </Button>
+
+            {/* Divider */}
+            <div className="mt-4 mb-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with email</span>
+                </div>
+              </div>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-3">
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -77,12 +131,12 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="Enter your email"
-                    className="h-12 pl-10 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-lg"
+                    className="h-10 pl-10 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-lg"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</Label>
                 <Input
                   id="password"
@@ -91,14 +145,14 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Enter your password"
-                  className="h-12 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-lg"
+                  className="h-10 border-2 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 rounded-lg"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-blue-400 hover:bg-blue-500 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl rounded-lg"
+                className="w-full h-10 bg-blue-400 hover:bg-blue-500 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl rounded-lg"
               >
                 {loading ? (
                   <>
@@ -111,7 +165,8 @@ export default function Login() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+
+            <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Don't have an account?{" "}
                 <Link
