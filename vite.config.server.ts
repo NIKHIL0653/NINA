@@ -14,7 +14,8 @@ export default defineConfig({
       }
     },
     ssr: true,
-    minify: false
+    minify: false,
+    target: 'node18'
   },
   resolve: {
     alias: {

@@ -28,6 +28,7 @@ import { privacyRoutes } from "./routes/privacy";
 import { emergencyAccessRoutes } from "./routes/emergencyAccess";
 import { securityRoutes } from "./routes/security";
 import { complianceRoutes } from "./routes/compliance";
+import serverless from "serverless-http";
 
 export function createServer() {
   const app = express();
@@ -141,3 +142,6 @@ export function createServer() {
 
   return app;
 }
+
+// Export for Vercel serverless functions
+export default serverless(createServer());

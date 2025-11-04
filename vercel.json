@@ -1,19 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "dist/server/node-build.mjs",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "dist/spa/**",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/dist/server/node-build.mjs"
+      "dest": "/api/$1"
     },
     {
       "src": "/(.*)",
@@ -21,7 +11,7 @@
     }
   ],
   "functions": {
-    "dist/server/node-build.mjs": {
+    "api/**/*.js": {
       "maxDuration": 30
     }
   }
