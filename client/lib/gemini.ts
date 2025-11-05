@@ -1,5 +1,5 @@
-const API_KEY = "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"; // OpenRouter API key
-const MODEL = "nvidia/nemotron-nano-12b-v2-vl:free"; // OpenRouter model
+const API_KEY = process.env.OPENROUTER_API_KEY || "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"; // OpenRouter API key
+const MODEL = process.env.AI_MODEL || "nvidia/nemotron-nano-12b-v2-vl:free"; // OpenRouter model
 const API_BASE_URL = "https://openrouter.ai/api/v1";
 
 const MEDICAL_PROMPT = `You are NINA, a professional and empathetic medical AI assistant with emotional intelligence capabilities. Your role is to help users analyze symptoms while being deeply attuned to their emotional state and providing compassionate, supportive care.
